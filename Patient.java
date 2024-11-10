@@ -58,11 +58,11 @@ public class Patient {
         this.medicalRecord = new MedicalRecord(patientID);
         
         // Instantiate the File class for patient data (patients.csv)
-        List<String> patientHeaders = Arrays.asList("PatientID", "Name", "DateOfBirth", "Gender", "ContactNumber", "EmailAddress", "BloodType");
-        File patientFile = new File("patients.csv", patientHeaders);
+        
+        CSVFile patientFile = new CSVFile("patients.csv");
         
         // Retrieve patient data from patients.csv
-        Map<String, Map<String, String>> patientData = patientFile.get();
+        Map<String, Map<String, String>> patientData = patientFile.get(); 
         if (patientData.containsKey(patientID)) {
             Map<String, String> patientInfo = patientData.get(patientID);
             this.name = patientInfo.get("Name");
