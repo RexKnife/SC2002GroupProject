@@ -7,9 +7,9 @@ public class CSVFile {
     private Map<String, Map<String, String>> data;
 
     // Constructor
-    public File(String filePath, List<String> headers) {
+    public CSVFile(String filePath) {
         this.filePath = filePath;
-        this.headers = headers;
+        this.headers = new ArrayList<>();
         this.data = new HashMap<>();
         loadData();
     }
@@ -17,7 +17,10 @@ public class CSVFile {
     // Load data from CSV file
     private void loadData() {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
+            String line = br.readLine();
+            if (line != null) {
+                headers = Arrays.asList(line.split(",")); // Load headers
+            }
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 String key = values[0];
@@ -57,5 +60,9 @@ public class CSVFile {
     // Getter for the file path
     public String getFilePath() {
         return filePath;
+    }
+
+    public List<String> getHeaders(){
+        return headers;
     }
 }
