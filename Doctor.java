@@ -1,4 +1,8 @@
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import javax.sound.midi.SysexMessage;
@@ -7,15 +11,27 @@ public class Doctor extends User {
     // Attributes
     private String doctorID;
     private String name;
-    private String specialization;
-    private ContactInfo contactInfo;
-    private Schedule availabilitySchedule;
-    private List<Appointment> appointments;
-    private List<Patient> patientsUnderCare;
+    private String contactNumber;
+    private String emailAddress;
+    private Schedule availabilitySchedule; 
 
     // Constructor
-    public Doctor(String username, String password) {
-        //code to create doctor object from excel file using username and password passed in 
+    public Doctor(String doctorID) {
+        this.doctorID = doctorID;
+        
+        CSVFile doctorFile = new CSVFile("doctors.csv");
+        
+        // Retrieve doctor data from doctors.csv
+        Map<String, Map<String, String>> doctorData = doctorFile.get(); 
+        if (doctorData.containsKey(doctorID)) {
+            Map<String, String> doctorInfo = doctorData.get(doctorID);
+            this.name = doctorInfo.get("Name");
+            this.contactNumber = doctorInfo.get("ContactNumber");
+            this.emailAddress = doctorInfo.get("EmailAddress");
+            this.availabilitySchedule = new Schedule("C:\\Users\\sreek\\OneDrive\\Documents\\SC2002\\Project 2\\SC2002GroupProject-main\\doctor_schedule.csv", doctorID);
+        } else {
+            throw new IOException("doctor with ID " + doctorID + " not found.");
+        }
     }
 
     // Methods
@@ -25,8 +41,8 @@ public class Doctor extends User {
 
         do {
             System.out.println("\nDoctor Menu:");
-            System.out.println("1. View Patient Medical Records");
-            System.out.println("2. Update Patient Medical Records");
+            System.out.println("1. View doctor Medical Records");
+            System.out.println("2. Update doctor Medical Records");
             System.out.println("3. View Personal Schedule");
             System.out.println("4. Set Availability for Appointments");
             System.out.println("5. Accept or Decline Appointment Requests");
@@ -39,10 +55,10 @@ public class Doctor extends User {
 
             switch (choice) {
                 case 1:
-                    viewPatientMedicalRecord();
+                    viewdoctorMedicalRecord();
                     break;
                 case 2:
-                    updatePatientMedicalRecord();
+                    updatedoctorMedicalRecord();
                     break;
                 case 3:
                     viewSchedule();
@@ -68,88 +84,47 @@ public class Doctor extends User {
         } while (choice != 8);
         // code to logout and return to main
     }
-    public void viewPatientMedicalRecord() {
-        for (int i = 0; i < patientsUnderCare.size(); i++){
-            System.out.println("Patient " + patientsUnderCare.get(i).patientID);
-            (patientsUnderCare.get(i)).viewMedicalRecord();
-        }
+    public void viewdoctorMedicalRecord() {
+
     }
-    public void updatePatientMedicalRecord() {
-        Scanner scanner = new Scanner (System.in);
-        System.out.println("Which patient's medical record would you like to update? Here are the patients under your care:");
-        for (int i=0; i < patientsUnderCare.size(); i++){
-            System.out.println((i + 1) + ". " + patientsUnderCare.get(i).patientID);
-        }
-        int patientChoice = scanner.nextInt();
-
-        System.out.println("Here is the chosen patient's medical record:");
-        (patientsUnderCare.get(patientChoice)).viewMedicalRecord();
-
-        System.out.println("Please add a new diagnosis:");
-        ((patientsUnderCare.get(patientChoice)).medicalRecord).addDiagnosis();
-        System.out.println("Please add a new treatment plan:");
-        ((patientsUnderCare.get(patientChoice)).medicalRecord).addTreatment();
-        
-        System.out.println("Patient's medical record updated successfully! Here is the updated medical record:");
-        (patientsUnderCare.get(patientChoice)).viewMedicalRecord();
+    public void updatedoctorMedicalRecord() {
         
     }
     public void viewSchedule() {
         availabilitySchedule.getAvailability();
     }
-    public void setAvailability() {
-        availabilitySchedule.setAvailability();
-    }
-    public void acceptDeclineAppointment(Appointment appointment) {
+    public void setAvailability() { //can update schedule
         Scanner scanner = new Scanner(System.in);
-        for (int i = 0; i < patientsUnderCare.size(); i++){
-            for (int j = 0; i < ((patientsUnderCare.get(i)).appointments.get(j)).size(); j++){
-                if (((patientsUnderCare.get(i)).appointments.get(j)).doctor == doctorID){
-                    if (((patientsUnderCare.get(i)).appointments.get(j)).status == "pending"){
-                        System.out.println("Here are pending appointments from your patients, choose one to accept or decline: ");
-                        System.out.println((1+j) +". " + ((patientsUnderCare.get(i)).appointments.get(j)).appointmentID + "(" + ((patientsUnderCare.get(i)).appointments.get(j)).patient.patientID + " on ... at " + ((patientsUnderCare.get(i)).appointments.get(j)).timeSlot.startTime + " to " + ((patientsUnderCare.get(i)).appointments.get(j)).timeSlot.endTime); //add date
-                    }
-                    int acceptDeclineChoice = scanner.nextInt();
-                    String choiceAD;
-                    do{
-                        System.out.println("Would you like to accept or decline this appointment?");
-                        choiceAD = scanner.nextLine();
-                        if (choiceAD == "accept"){
-                            ((patientsUnderCare.get(i)).appointments.get(acceptDeclineChoice)).status = "confirmed";
-                            availabilitySchedule.removeAvailablity(((patientsUnderCare.get(i)).appointments.get(acceptDeclineChoice)).timeSlot);
-                        } else if(choiceAD == "decline"){
-                            ((patientsUnderCare.get(i)).appointments.get(acceptDeclineChoice)).status = "declined";
-                        }
-                    } while (choiceAD != "accept" || choiceAD != "decline");
-                    
-                }   
+        System.out.println("Would you like to add or remove availability?");
+        String choice = scanner.nextLine();
+        do{
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
+            if(choice == "add" || choice == "Add"){
+                System.out.println("What time would you like to add? Please input in yyyy-MM-dd-HH-mm format: ");
+                String timeadd = scanner.nextLine();
+                LocalDateTime dateTime1 = LocalDateTime.parse(timeadd, formatter);
+                availabilitySchedule.removeAvailability(dateTime1);
+                System.out.println(timeadd + " added!");
+            } else if (choice == "remove" || choice == "Remove"){
+                System.out.println("What time would you like to remove? Please input in yyyy-MM-dd-HH-mm format: ");
+                String timeremove = scanner.nextLine();
+                LocalDateTime dateTime2 = LocalDateTime.parse(timeremove, formatter);
+                availabilitySchedule.addAvailability(dateTime2);
+                System.out.println(timeremove + " removed!");
+            } else {
+                System.out.println("Invalid choice");
             }
-        }
+        } while (choice != "add" || choice == "Add" || choice == "remove" || choice == "Remove");
+
+
+    }
+    public void acceptDeclineAppointment(Appointment appointment) { //can update schedule
+
     }
     public void viewUpcomingAppointments() {
-        for (int i = 0; i < patientsUnderCare.size(); i++){
-            for (int j = 0; i < ((patientsUnderCare.get(i)).appointments.get(j)).size(); j++){
-                if (((patientsUnderCare.get(i)).appointments.get(j)).doctor == doctorID){
-                    if (((patientsUnderCare.get(i)).appointments.get(j)).status == "confirmed"){
-                        System.out.println("Here is the list of confirmed appointments from your patients");
-                        System.out.println((1+j) +". " + ((patientsUnderCare.get(i)).appointments.get(j)).appointmentID + "(" + ((patientsUnderCare.get(i)).appointments.get(j)).patient.patientID + " on ... at " + ((patientsUnderCare.get(i)).appointments.get(j)).timeSlot.startTime + " to " + ((patientsUnderCare.get(i)).appointments.get(j)).timeSlot.endTime); //add date
-                    }
-                }
-            }
-        }
+
     }
     public void recordAppointmentOutcome() {
-        //have to update timeslot class to hold actual date, time objects, so we can determine whichconfirmed appointments have completed already
+        
     }
-    public void addPatient (Patient patient){//use method in patient class for when a patient books/rescehdules an appointment with this doctor
-        patientsUnderCare.add(patient); 
-    }
-    public void removePatient (Patient patient){ //use method in patient class for when a patient cancels an appointment with this doctor
-        for (int i=0; i < patientsUnderCare.size(); i++){
-            if ((patientsUnderCare.get(i)).patientID == patient.patientID){
-                patientsUnderCare.remove(i);
-            }
-        }
-    }
-    // Getters and setters can be added as needed
 }
