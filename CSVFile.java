@@ -35,7 +35,7 @@ public class CSVFile {
         }
     }
 
-    // Get data from the file (returns a Map of the patient data, assuming first column is the ID)
+    // Get data from the file (returns a Map of the data, assuming first column is the ID)
     public Map<String, Map<String, String>> get() {
         return data;
     }
@@ -43,11 +43,17 @@ public class CSVFile {
     // Update the CSV file with new data (Map format)
     public void update(Map<String, Map<String, String>> newData) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            // Write the data
+            // Write headers only once
+            bw.write(String.join(",", headers));
+            bw.newLine();
+
+            // Write each row of data
             for (Map.Entry<String, Map<String, String>> entry : newData.entrySet()) {
                 StringBuilder line = new StringBuilder(entry.getKey());
+                Map<String, String> row = entry.getValue();
+
                 for (String header : headers.subList(1, headers.size())) {
-                    line.append(",").append(entry.getValue().get(header));
+                    line.append(",").append(row.getOrDefault(header, ""));
                 }
                 bw.write(line.toString());
                 bw.newLine();
@@ -62,7 +68,7 @@ public class CSVFile {
         return filePath;
     }
 
-    public List<String> getHeaders(){
+    public List<String> getHeaders() {
         return headers;
     }
 }
