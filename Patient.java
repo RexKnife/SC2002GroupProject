@@ -14,7 +14,7 @@ Requirements:
     
     <File Class>
     - All Data is stored in CSV Format
-    - There are 5 data stores: User Type(Links ID to User Type), Patient Data, Medical Record, Appointment Data, Doctor Data, Admin Data and Pharmacist Data
+    - There are 7 data stores: User Type(Links ID to User Type and Password), Patient Data, Appointment Data, Doctor Data, Admin Data, Medicine and Pharmacist Data
     - File Class Implements this CSV storage and structures this data when being stored, retrieved and edited
     - file.get(): Returns a Map<map<string>> of the patient data, assuming the first columns are the IDs with the path and headers initialized in the constructor
     - file.update() Update the stored path with the new map to reflect the changes in CSV form
