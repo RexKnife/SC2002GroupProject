@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class File {
+public class CSVFile {
     private String filePath;
     private List<String> headers;
     private Map<String, Map<String, String>> data;
@@ -40,10 +40,6 @@ public class File {
     // Update the CSV file with new data (Map format)
     public void update(Map<String, Map<String, String>> newData) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            // Write the headers
-            bw.write(String.join(",", headers));
-            bw.newLine();
-
             // Write the data
             for (Map.Entry<String, Map<String, String>> entry : newData.entrySet()) {
                 StringBuilder line = new StringBuilder(entry.getKey());
